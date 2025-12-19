@@ -1,5 +1,6 @@
 package co.com.nexus.api.user;
 
+import co.com.nexus.api.config.ObjectValidator;
 import co.com.nexus.api.user.dto.UpdateUserRequest;
 import co.com.nexus.api.user.mapper.UserMapper;
 import co.com.nexus.model.shared.pagination.PagingResult;
@@ -24,6 +25,7 @@ public class UserHandler {
     private final GetUserByIdUseCase getUserByIdUseCase;
     private final CreateUserUseCase createUserUseCase;
     private final UpdateUserUseCase updateUserUseCase;
+    private final ObjectValidator objectValidator;
 
     public Mono<ServerResponse> getAllUsers(ServerRequest request) {
         return ServerResponse.ok()
@@ -48,6 +50,7 @@ public class UserHandler {
     public Mono<ServerResponse> updateUser(ServerRequest request) {
         String id = request.pathVariable("id");
         return request.bodyToMono(UpdateUserRequest.class)
+                .flatMap(objectValidator::validate)
                 .flatMap(ele -> ServerResponse.ok()
                         .contentType(MediaType.APPLICATION_JSON)
                         .body(updateUserUseCase.apply(UUID.fromString(id), UserMapper.mapToUserModel(ele)), UserModel.class));
