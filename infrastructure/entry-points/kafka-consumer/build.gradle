@@ -1,0 +1,10 @@
+dependencies {
+    implementation project(':model')
+    implementation project(':usecase')
+    implementation 'io.projectreactor.kafka:reactor-kafka'
+    implementation 'org.springframework.kafka:spring-kafka'
+    implementation 'org.springframework.boot:spring-boot-autoconfigure'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.2'
+    implementation 'org.springframework.boot:spring-boot'
+    implementation 'org.apache.logging.log4j:log4j-api'
+}

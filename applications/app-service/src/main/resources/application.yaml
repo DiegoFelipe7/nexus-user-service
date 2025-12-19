@@ -1,0 +1,47 @@
+server:
+  port: 8081
+spring:
+  application:
+    name: "nexus-user-service"
+  devtools:
+    add-properties: false
+  profiles:
+    include: null
+  kafka:
+    consumer:
+      bootstrap-servers: "localhost:9092"
+      key-deserializer: "org.apache.kafka.common.serialization.StringDeserializer"
+      value-deserializer: "org.apache.kafka.common.serialization.StringDeserializer"
+      group-id: "nexus-user-service"
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,prometheus"
+  endpoint:
+    health:
+      probes:
+        enabled: true
+cors:
+  allowed-origins: "http://localhost:4200,http://localhost:8080"
+eureka:
+  client:
+    service-url:
+      defaultZone: "http://localhost:8761/eureka/"
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+adapters:
+  r2dbc:
+    host: "localhost"
+    port: 5432
+    database: "postgres"
+    schema: "public"
+    username: "postgres"
+    password: "postgres"
+  kafka:
+    consumer:
+      topics:
+        user-registration-event
+
