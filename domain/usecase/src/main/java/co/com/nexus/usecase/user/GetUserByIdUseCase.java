@@ -12,11 +12,12 @@ import java.util.function.Function;
 
 @RequiredArgsConstructor
 public class GetUserByIdUseCase implements Function<UUID, Mono<UserModel>> {
-   private final UserRepository userRepository;
+    private final UserRepository userRepository;
+
     @Override
     public Mono<UserModel> apply(UUID uuid) {
         return userRepository.findById(uuid)
-                .switchIfEmpty(Mono.error(new NexusException("USUARIO NO ENCONTRADO" , HttpStatus.FORBIDDEN)))
-                ;
+                .switchIfEmpty(Mono.error(new NexusException("USUARIO NO ENCONTRADO", HttpStatus.FORBIDDEN)));
+
     }
 }

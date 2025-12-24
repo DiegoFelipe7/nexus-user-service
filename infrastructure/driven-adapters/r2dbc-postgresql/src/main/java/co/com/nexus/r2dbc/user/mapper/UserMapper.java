@@ -15,6 +15,8 @@ public class UserMapper {
                 .lastName(user.getLastName())
                 .email(user.getEmail())
                 .phoneNumber(user.getPhoneNumber())
+                .avatarUrl(user.getAvatarUrl())
+                .birthDate(user.getBirthDate())
                 .searchKey(user.getSearchKey())
                 .updatedAt(user.getUpdatedAt())
                 .createdAt(user.getCreatedAt())
@@ -25,12 +27,15 @@ public class UserMapper {
 
     public static User mapToEntity(UserModel userModel) {
         return User.builder()
+                .id(userModel.getId())
                 .userId(userModel.getUserId())
                 .firstName(userModel.getFirstName())
                 .lastName(userModel.getLastName())
                 .email(userModel.getEmail())
                 .searchKey(userModel.getSearchKey())
                 .phoneNumber(userModel.getPhoneNumber())
+                .avatarUrl(userModel.getAvatarUrl())
+                .birthDate(userModel.getBirthDate())
                 .updatedAt(userModel.getUpdatedAt())
                 .createdAt(userModel.getCreatedAt())
                 .build();

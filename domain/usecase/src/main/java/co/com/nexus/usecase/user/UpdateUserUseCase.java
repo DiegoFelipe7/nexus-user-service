@@ -18,8 +18,10 @@ public class UpdateUserUseCase implements BiFunction<UUID, UserModel, Mono<UserM
         return userRepository.findById(uuid)
                 .switchIfEmpty(Mono.error(new NexusException("USUARIO NO ENCONTRADO" , HttpStatus.FORBIDDEN)))
                 .flatMap(ele-> {
-                    userModel.setId(ele.getId());
-                    return userRepository.saveUser(userModel);
+                    ele.setFirstName(userModel.getFirstName());
+                    ele.setLastName(userModel.getLastName());
+                    ele.setPhoneNumber(userModel.getPhoneNumber());
+                    return userRepository.saveUser(ele);
                 });
 
     }

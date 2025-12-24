@@ -24,7 +24,6 @@ public class UserMapper {
         return UserModel.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
-                .email(request.getEmail())
                 .phoneNumber(request.getPhoneNumber())
                 .build();
     }

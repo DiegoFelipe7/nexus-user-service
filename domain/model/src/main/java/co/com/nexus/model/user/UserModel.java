@@ -18,6 +18,8 @@ public class UserModel {
     private String email;
     private String phoneNumber;
     private String searchKey;
+    private String avatarUrl;
+    private String birthDate;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

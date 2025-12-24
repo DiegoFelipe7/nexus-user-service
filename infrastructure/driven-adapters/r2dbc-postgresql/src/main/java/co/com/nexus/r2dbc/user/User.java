@@ -3,7 +3,6 @@ package co.com.nexus.r2dbc.user;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDateTime;
@@ -24,6 +23,8 @@ public class User {
     private String email;
     private String phoneNumber;
     private String searchKey;
+    private String avatarUrl;
+    private String birthDate;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

@@ -7,6 +7,7 @@ spring:
     add-properties: false
   profiles:
     include: null
+    active: "local"
   kafka:
     consumer:
       bootstrap-servers: "localhost:9092"
@@ -42,6 +43,10 @@ adapters:
     password: "postgres"
   kafka:
     consumer:
-      topics:
-        user-registration-event
+      topics: "user-registration-event"
+  aws:
+    s3:
+      bucketName: "ariumms-gcm-s3-bucket"
+      region: "us-east-1"
+      endpoint: "https://s3.localhost.localstack.cloud:4566"
 
