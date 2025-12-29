@@ -23,7 +23,6 @@ import java.util.UUID;
 public class UserHandler {
     private final GetAllUsersUseCase getAllUsersUseCase;
     private final GetUserByIdUseCase getUserByIdUseCase;
-    private final CreateUserUseCase createUserUseCase;
     private final UpdateUserUseCase updateUserUseCase;
     private final UpdateUserAvatarUseCase updateUserAvatarUseCase;
     private final ObjectValidator objectValidator;
@@ -41,12 +40,6 @@ public class UserHandler {
                 .body(getUserByIdUseCase.apply(UUID.fromString(id)), UserModel.class);
     }
 
-    public Mono<ServerResponse> createUser(ServerRequest request) {
-        return request.bodyToMono(UserModel.class)
-                .flatMap(ele -> ServerResponse.ok()
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .body(createUserUseCase.apply(ele), UserModel.class));
-    }
 
     public Mono<ServerResponse> updateUser(ServerRequest request) {
         String id = request.pathVariable("id");
