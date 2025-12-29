@@ -6,7 +6,6 @@ import co.com.nexus.api.address.mapper.AddressMapper;
 import co.com.nexus.api.config.ObjectValidator;
 import co.com.nexus.api.utilities.RequestHeaderUtils;
 import co.com.nexus.model.address.AddressModel;
-import co.com.nexus.model.shared.pagination.PagingResult;
 import co.com.nexus.usecase.address.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;

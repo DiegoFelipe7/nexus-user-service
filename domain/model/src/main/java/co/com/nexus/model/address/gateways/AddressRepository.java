@@ -1,8 +1,6 @@
 package co.com.nexus.model.address.gateways;
 
 import co.com.nexus.model.address.AddressModel;
-import co.com.nexus.model.shared.pagination.PagingResult;
-import co.com.nexus.model.shared.pagination.QueryParams;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

@@ -2,13 +2,9 @@ package co.com.nexus.r2dbc.address;
 
 import co.com.nexus.model.address.AddressModel;
 import co.com.nexus.model.address.gateways.AddressRepository;
-import co.com.nexus.model.shared.pagination.PagingResult;
-import co.com.nexus.model.shared.pagination.QueryParams;
 import co.com.nexus.r2dbc.address.mapper.AddressMapper;
 import co.com.nexus.r2dbc.helper.ReactiveAdapterOperations;
 import org.reactivecommons.utils.ObjectMapper;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

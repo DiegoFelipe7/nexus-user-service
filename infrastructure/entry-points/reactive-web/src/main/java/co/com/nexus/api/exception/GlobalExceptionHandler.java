@@ -1,10 +1,10 @@
 package co.com.nexus.api.exception;
 
 import co.com.nexus.api.utilities.ExceptionUtils;
-import co.com.nexus.model.shared.exception.CustomException;
 import co.com.nexus.model.shared.exception.NexusException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler;
@@ -31,6 +31,7 @@ public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
     private final ObjectMapper objectMapper;
 
     @Override
+    @NonNull
     public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {
         ErrorResponse errorResponse = buildErrorResponse(ex);
         HttpStatus status = errorResponse.status();
