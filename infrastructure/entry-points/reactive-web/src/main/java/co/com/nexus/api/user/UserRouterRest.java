@@ -14,7 +14,6 @@ public class UserRouterRest {
     public RouterFunction<ServerResponse> routerFunction(UserHandler handler) {
         return route(GET("users"), handler::getAllUsers)
                 .and(route(GET("users/{id}"), handler::getUserById))
-                .and(route(POST("users"), handler::createUser))
                 .and(route(PATCH("users/{id}"), handler::updateUser))
                 .and(route(PATCH("users/{id}/avatar"), handler::updateUserAvatar));
     }
