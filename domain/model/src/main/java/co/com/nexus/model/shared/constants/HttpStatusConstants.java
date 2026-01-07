@@ -1,6 +1,6 @@
 package co.com.nexus.model.shared.constants;
 
-public final class HttpStatus {
+public final class HttpStatusConstants {
     public static final int BAD_REQUEST = 400;
     public static final int UNAUTHORIZED = 401;
     public static final int FORBIDDEN = 403;
@@ -10,5 +10,7 @@ public final class HttpStatus {
     public static final int NOT_IMPLEMENTED = 501;
     public static final int BAD_GATEWAY = 502;
 
-    private HttpStatus() {}
+    private HttpStatusConstants() {
+        throw new IllegalStateException("Utility class");
+    }
 }

@@ -1,7 +1,7 @@
 package co.com.nexus.kafka.consumer;
 
 import co.com.nexus.kafka.consumer.mapper.KafkaMapper;
-import co.com.nexus.model.shared.constants.KafkaEvents;
+import co.com.nexus.model.shared.events.KafkaEvents;
 import co.com.nexus.model.user.UserModel;
 import co.com.nexus.usecase.user.CreateUserUseCase;
 import lombok.RequiredArgsConstructor;

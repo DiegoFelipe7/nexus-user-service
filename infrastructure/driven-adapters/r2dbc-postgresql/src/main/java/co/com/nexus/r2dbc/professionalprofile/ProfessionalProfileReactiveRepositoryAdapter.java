@@ -2,7 +2,7 @@ package co.com.nexus.r2dbc.professionalprofile;
 
 import co.com.nexus.model.professionalprofile.ProfessionalProfileModel;
 import co.com.nexus.model.professionalprofile.gateways.ProfessionalProfileRepository;
-import co.com.nexus.model.shared.constants.HttpStatus;
+import co.com.nexus.model.shared.constants.HttpStatusConstants;
 import co.com.nexus.model.shared.exception.NexusException;
 import co.com.nexus.r2dbc.helper.ReactiveAdapterOperations;
 import co.com.nexus.r2dbc.professionalprofile.mapper.ProfessionalProfileMapper;
@@ -28,7 +28,7 @@ public class ProfessionalProfileReactiveRepositoryAdapter extends ReactiveAdapte
     @Override
     public Mono<ProfessionalProfileModel> findByUserId(UUID userId) {
         return this.repository.findByUserId(userId)
-                .switchIfEmpty(Mono.error(new NexusException("PERFIL PROFESIONAL NO ENCONTRADO" , HttpStatus.NOT_FOUND)))
+                .switchIfEmpty(Mono.error(new NexusException("PERFIL PROFESIONAL NO ENCONTRADO" , HttpStatusConstants.NOT_FOUND)))
                 .map(ProfessionalProfileMapper::mapToModel);
     }
 }
