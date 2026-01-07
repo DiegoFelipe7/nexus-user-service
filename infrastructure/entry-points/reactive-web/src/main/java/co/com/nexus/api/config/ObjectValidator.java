@@ -1,6 +1,6 @@
 package co.com.nexus.api.config;
 
-import co.com.nexus.model.shared.constants.HttpStatus;
+import co.com.nexus.model.shared.constants.HttpStatusConstants;
 import co.com.nexus.model.shared.exception.NexusException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
@@ -25,7 +25,7 @@ public class ObjectValidator {
                 String message = violations.stream()
                         .map(ConstraintViolation::getMessage)
                         .collect(Collectors.joining(", "));
-                throw new NexusException(message, HttpStatus.BAD_REQUEST);
+                throw new NexusException(message, HttpStatusConstants.BAD_REQUEST);
             }
 
             return object;

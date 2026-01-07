@@ -3,7 +3,9 @@ package co.com.nexus.api.professionalprofile;
 import co.com.nexus.api.config.ObjectValidator;
 import co.com.nexus.api.professionalprofile.dto.ProfessionalProfileRequest;
 import co.com.nexus.api.professionalprofile.mapper.ProfessionalProfileMapper;
+import co.com.nexus.api.utilities.RequestHeaderUtils;
 import co.com.nexus.model.professionalprofile.ProfessionalProfileModel;
+import co.com.nexus.model.shared.constants.ApiConstants;
 import co.com.nexus.model.shared.pagination.PagingResult;
 import co.com.nexus.usecase.professionalprofile.*;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +34,7 @@ public class ProfessionalProfileHandler {
     }
 
     public Mono<ServerResponse> getProfessionalProfileByUserId(ServerRequest request) {
-        String userId = request.pathVariable("userId");
+        String userId = request.headers().firstHeader(ApiConstants.USER_ID_HEADER);
         return ServerResponse.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(getProfessionalProfileByUserIdUseCase.apply(UUID.fromString(userId)), ProfessionalProfileModel.class);
