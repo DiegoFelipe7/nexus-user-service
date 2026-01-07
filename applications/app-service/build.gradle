@@ -1,6 +1,7 @@
 apply plugin: 'org.springframework.boot'
 
 dependencies {
+	implementation project(':rabbit-mq-consumer')
 	implementation project(':s3-repository')
 	implementation project(':metrics')
 	implementation 'software.amazon.awssdk:sts'
