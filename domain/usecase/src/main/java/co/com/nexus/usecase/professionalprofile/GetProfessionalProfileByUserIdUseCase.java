@@ -2,7 +2,7 @@ package co.com.nexus.usecase.professionalprofile;
 
 import co.com.nexus.model.professionalprofile.ProfessionalProfileModel;
 import co.com.nexus.model.professionalprofile.gateways.ProfessionalProfileRepository;
-import co.com.nexus.model.shared.constants.HttpStatus;
+import co.com.nexus.model.shared.constants.HttpStatusConstants;
 import co.com.nexus.model.shared.exception.NexusException;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
@@ -17,6 +17,6 @@ public class GetProfessionalProfileByUserIdUseCase implements Function<UUID, Mon
     @Override
     public Mono<ProfessionalProfileModel> apply(UUID userId) {
         return professionalProfileRepository.findByUserId(userId)
-                .switchIfEmpty(Mono.error(new NexusException("PERFIL PROFESIONAL NO ENCONTRADO PARA ESTE USUARIO", HttpStatus.NOT_FOUND)));
+                .switchIfEmpty(Mono.error(new NexusException("PERFIL PROFESIONAL NO ENCONTRADO PARA ESTE USUARIO", HttpStatusConstants.NOT_FOUND)));
     }
 }

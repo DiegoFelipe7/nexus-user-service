@@ -2,7 +2,7 @@ package co.com.nexus.usecase.professionalprofile;
 
 import co.com.nexus.model.professionalprofile.ProfessionalProfileModel;
 import co.com.nexus.model.professionalprofile.gateways.ProfessionalProfileRepository;
-import co.com.nexus.model.shared.constants.HttpStatus;
+import co.com.nexus.model.shared.constants.HttpStatusConstants;
 import co.com.nexus.model.shared.exception.NexusException;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
@@ -16,7 +16,7 @@ public class UpdateProfessionalProfileUseCase implements Function<ProfessionalPr
     @Override
     public Mono<ProfessionalProfileModel> apply(ProfessionalProfileModel professionalProfileModel) {
         return professionalProfileRepository.findById(professionalProfileModel.getUserId())
-                .switchIfEmpty(Mono.error(new NexusException("PERFIL PROFESIONAL NO ENCONTRADO", HttpStatus.NOT_FOUND)))
+                .switchIfEmpty(Mono.error(new NexusException("PERFIL PROFESIONAL NO ENCONTRADO", HttpStatusConstants.NOT_FOUND)))
                 .flatMap(existing -> {
                     existing.setSpecialty(professionalProfileModel.getSpecialty());
                     existing.setMedicalLicense(professionalProfileModel.getMedicalLicense());

@@ -1,6 +1,6 @@
 package co.com.nexus.usecase.user;
 
-import co.com.nexus.model.shared.constants.HttpStatus;
+import co.com.nexus.model.shared.constants.HttpStatusConstants;
 import co.com.nexus.model.shared.exception.NexusException;
 import co.com.nexus.model.user.UserModel;
 import co.com.nexus.model.user.gateways.S3Repository;
@@ -22,7 +22,7 @@ public class UpdateUserAvatarUseCase implements BiFunction<UUID,  byte[], Mono<S
     public Mono<String> apply(UUID uuid, byte[] avatarFile) {
         return s3Repository.uploadUserAvatar(avatarFile)
                 .flatMap(ele -> userRepository.findById(uuid)
-                        .switchIfEmpty(Mono.error(new NexusException("USUARIO NO ENCONTRADO", HttpStatus.FORBIDDEN)))
+                        .switchIfEmpty(Mono.error(new NexusException("USUARIO NO ENCONTRADO", HttpStatusConstants.FORBIDDEN)))
                         .flatMap(userModel -> {
                             userModel.setAvatarUrl(ele);
                             return userRepository.saveUser(userModel)

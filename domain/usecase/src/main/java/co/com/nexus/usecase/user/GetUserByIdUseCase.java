@@ -1,6 +1,6 @@
 package co.com.nexus.usecase.user;
 
-import co.com.nexus.model.shared.constants.HttpStatus;
+import co.com.nexus.model.shared.constants.HttpStatusConstants;
 import co.com.nexus.model.shared.exception.NexusException;
 import co.com.nexus.model.user.UserModel;
 import co.com.nexus.model.user.gateways.UserRepository;
@@ -17,7 +17,7 @@ public class GetUserByIdUseCase implements Function<UUID, Mono<UserModel>> {
     @Override
     public Mono<UserModel> apply(UUID uuid) {
         return userRepository.findById(uuid)
-                .switchIfEmpty(Mono.error(new NexusException("USUARIO NO ENCONTRADO", HttpStatus.FORBIDDEN)));
+                .switchIfEmpty(Mono.error(new NexusException("USUARIO NO ENCONTRADO", HttpStatusConstants.FORBIDDEN)));
 
     }
 }
