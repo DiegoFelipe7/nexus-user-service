@@ -3,21 +3,30 @@ package co.com.nexus.api.user;
 import co.com.nexus.api.config.ObjectValidator;
 import co.com.nexus.api.user.dto.UpdateUserRequest;
 import co.com.nexus.api.user.mapper.UserMapper;
+import co.com.nexus.model.s3.FileUploadModel;
+import co.com.nexus.model.shared.constants.HttpStatusConstants;
 import co.com.nexus.model.shared.exception.CustomException;
+import co.com.nexus.model.shared.exception.NexusException;
 import co.com.nexus.model.shared.pagination.PagingResult;
 import co.com.nexus.model.user.UserModel;
 import co.com.nexus.usecase.user.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class UserHandler {
@@ -52,25 +61,26 @@ public class UserHandler {
     public Mono<ServerResponse> updateUserAvatar(ServerRequest request) {
         String id = request.pathVariable("id");
         return request.multipartData()
-                .flatMap(parts -> {
-                    FilePart filePart = (FilePart) parts.toSingleValueMap().get("file");
-                    if (filePart == null) {
-                        return ServerResponse.badRequest().bodyValue(new CustomException("File part 'file' is missing"));
-                    }
-                    return filePart.content()
-                            .reduce(new java.io.ByteArrayOutputStream(), (baos, dataBuffer) -> {
-                                byte[] bytes = new byte[dataBuffer.readableByteCount()];
-                                dataBuffer.read(bytes);
-                                baos.write(bytes, 0, bytes.length);
-                                return baos;
-                            })
-                            .map(java.io.ByteArrayOutputStream::toByteArray)
-                            .flatMap(bytes -> updateUserAvatarUseCase.apply(UUID.fromString(id), bytes))
-                            .flatMap(url -> ServerResponse.ok()
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .bodyValue(Map.of("url", url))
+                .flatMap(parts -> Mono.justOrEmpty(parts.getFirst("file")).ofType(FilePart.class))
+                .switchIfEmpty(Mono.error(new NexusException("No file part found", HttpStatusConstants.BAD_REQUEST)))
+                .flatMap(file -> DataBufferUtils.join(file.content())
+                        .map(dataBuffer -> {
+                            byte[] bytes = new byte[dataBuffer.readableByteCount()];
+                            dataBuffer.read(bytes);
+                            DataBufferUtils.release(dataBuffer);
+                            return new FileUploadModel(
+                                    file.filename(),
+                                    file.headers().getContentType().toString(),
+                                    bytes.length,
+                                    bytes
                             );
-                });
+                        }))
+                .flatMap(ele ->
+                        ServerResponse.ok()
+                                .contentType(MediaType.TEXT_PLAIN)
+                                .body(updateUserAvatarUseCase.apply(UUID.fromString(id), ele), String.class));
+
+
     }
 
 }
