@@ -1,101 +1,109 @@
 package co.com.nexus.api.exception;
 
+import co.com.nexus.api.utilities.ExceptionUtils;
 import co.com.nexus.model.shared.exception.NexusException;
-import jakarta.validation.ConstraintViolationException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.support.WebExchangeBindException;
+import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.stream.Collectors;
 
-@RestControllerAdvice
-public class GlobalExceptionHandler {
+@Slf4j
+@Configuration
+@Order(-2)
+@RequiredArgsConstructor
+public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
 
-    @ExceptionHandler(WebExchangeBindException.class)
-    public Mono<ResponseEntity<ErrorResponse>> handleValidation(WebExchangeBindException ex) {
-        String message = ex.getFieldErrors().stream()
-                .map(err -> err.getField() + ": " + err.getDefaultMessage())
+    private final ObjectMapper objectMapper;
+
+    @Override
+    @NonNull
+    public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {
+        ErrorResponse errorResponse = buildErrorResponse(ex);
+        HttpStatus status = errorResponse.status();
+
+        exchange.getResponse().setStatusCode(status);
+        exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON);
+
+        DataBufferFactory bufferFactory = exchange.getResponse().bufferFactory();
+        DataBuffer dataBuffer;
+
+        try {
+            dataBuffer = bufferFactory.wrap(objectMapper.writeValueAsBytes(errorResponse));
+        } catch (JsonProcessingException e) {
+            log.error("Error al serializar la respuesta de error", e);
+            dataBuffer = bufferFactory.wrap("Error interno del servidor".getBytes());
+        }
+
+        return exchange.getResponse().writeWith(Mono.just(dataBuffer));
+    }
+
+    private ErrorResponse buildErrorResponse(Throwable ex) {
+        if (ex instanceof NexusException customException) {
+            return handleCustomException(customException);
+        } else if (ex instanceof WebExchangeBindException validationException) {
+            return handleValidationException(validationException);
+        } else if (ex instanceof IllegalArgumentException illegalArgumentException) {
+            return handleIllegalArgumentException(illegalArgumentException);
+        } else {
+            return handleGenericException(ex);
+        }
+    }
+
+    private ErrorResponse handleCustomException(NexusException ex) {
+        HttpStatus status = HttpStatus.valueOf(ex.getHttpStatus());
+        return ErrorResponse.of(
+                ex.getMessage(),
+                status,
+                LocalDateTime.now(),
+                ExceptionUtils.origin(ex) + ": " + ExceptionUtils.rootCause(ex)
+        );
+    }
+
+    private ErrorResponse handleValidationException(WebExchangeBindException ex) {
+        String details = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
                 .collect(Collectors.joining(", "));
 
-        return Mono.just(
-                ResponseEntity
-                        .status(HttpStatus.BAD_REQUEST)
-                        .body(ErrorResponse.of(
-                                message,
-                                "Estimado socio, los datos son incorrectos",
-                                HttpStatus.BAD_REQUEST,
-                                LocalDateTime.now(),
-                                "VALIDATION_ERROR"
-                        ))
+        return ErrorResponse.of(
+                details,
+                HttpStatus.BAD_REQUEST,
+                LocalDateTime.now(),
+                Arrays.toString(ex.getStackTrace())
         );
     }
 
-    @ExceptionHandler(ConstraintViolationException.class)
-    public Mono<ResponseEntity<ErrorResponse>> handleConstraintViolation(ConstraintViolationException ex) {
-        String message = ex.getConstraintViolations().stream()
-                .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
-                .collect(Collectors.joining(", "));
-
-        return Mono.just(
-                ResponseEntity
-                        .status(HttpStatus.BAD_REQUEST)
-                        .body(ErrorResponse.of(
-                                message,
-                                "Los datos proporcionados no cumplen con las validaciones requeridas",
-                                HttpStatus.BAD_REQUEST,
-                                LocalDateTime.now(),
-                                "CONSTRAINT_VIOLATION"
-                        ))
+    private ErrorResponse handleIllegalArgumentException(IllegalArgumentException ex) {
+        return ErrorResponse.of(
+                ex.getMessage(),
+                HttpStatus.BAD_REQUEST,
+                LocalDateTime.now(),
+                Arrays.toString(ex.getStackTrace())
         );
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public Mono<ResponseEntity<ErrorResponse>> handleIllegalArgument(IllegalArgumentException ex) {
-        return Mono.just(
-                ResponseEntity
-                        .status(HttpStatus.BAD_REQUEST)
-                        .body(ErrorResponse.of(
-                                ex.getMessage(),
-                                "Los datos proporcionados son inválidos",
-                                HttpStatus.BAD_REQUEST,
-                                LocalDateTime.now(),
-                                "INVALID_ARGUMENT"
-                        ))
-        );
-    }
-
-    @ExceptionHandler(NexusException.class)
-    public Mono<ResponseEntity<ErrorResponse>> handleNexusException(NexusException ex) {
-        HttpStatus httpStatus = HttpStatus.valueOf(ex.getHttpStatus());
-        return Mono.just(
-                ResponseEntity
-                        .status(httpStatus)
-                        .body(ErrorResponse.of(
-                                ex.getMessage(),
-                                "Por favor intente más tarde",
-                                httpStatus,
-                                LocalDateTime.now(),
-                                ex.getCode() != null ? ex.getCode() : ex.getClass().getSimpleName()
-                        ))
-        );
-    }
-
-    @ExceptionHandler(Exception.class)
-    public Mono<ResponseEntity<ErrorResponse>> handleGenericException(Exception ex) {
-        return Mono.just(
-                ResponseEntity
-                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body(ErrorResponse.of(
-                                ex.getMessage(),
-                                "Ocurrió un error inesperado. Por favor intente más tarde.",
-                                HttpStatus.INTERNAL_SERVER_ERROR,
-                                LocalDateTime.now(),
-                                ex.getClass().getSimpleName()
-                        ))
+    private ErrorResponse handleGenericException(Throwable ex) {
+        return ErrorResponse.of(
+                ex.getMessage() != null ? ex.getMessage() :"Error interno del servidor",
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                LocalDateTime.now(),
+                Arrays.toString(ex.getStackTrace())
         );
     }
 }
