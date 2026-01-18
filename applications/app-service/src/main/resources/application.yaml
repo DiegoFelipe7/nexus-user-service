@@ -7,7 +7,7 @@ spring:
     add-properties: false
   profiles:
     include: null
-    active: "local"
+    active: "production"
 management:
   endpoints:
     web:

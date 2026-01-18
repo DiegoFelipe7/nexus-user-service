@@ -17,7 +17,7 @@ import java.net.URI;
 
 @Configuration
 public class S3Config {
-
+    @Profile("production")
     @Bean
     public S3AsyncClient s3AsyncClient(S3ConnectionProperties s3Properties, MetricPublisher publisher) {
         return S3AsyncClient.builder()
@@ -42,7 +42,7 @@ public class S3Config {
                 .build();
     }
 
-    /*@Profile("local")
+    @Profile("local")
     @Bean
     public S3AsyncClient localS3AsyncClient(S3ConnectionProperties s3Properties,
                                             MetricPublisher publisher) {
@@ -52,6 +52,6 @@ public class S3Config {
                 .credentialsProvider(() -> AwsBasicCredentials.create(s3Properties.accessKey(), s3Properties.secretKey()))
                 .endpointOverride(URI.create(s3Properties.endpoint()))
                 .build();
-    }*/
+    }
 
 }
