@@ -1,6 +1,6 @@
 package co.com.nexus.usecase.user;
 
-import co.com.nexus.model.shared.constants.HttpStatus;
+import co.com.nexus.model.shared.constants.HttpStatusConstants;
 import co.com.nexus.model.shared.exception.NexusException;
 import co.com.nexus.model.user.UserModel;
 import co.com.nexus.model.user.gateways.UserRepository;
@@ -16,7 +16,7 @@ public class UpdateUserUseCase implements BiFunction<UUID, UserModel, Mono<UserM
     @Override
     public Mono<UserModel> apply(UUID uuid, UserModel userModel) {
         return userRepository.findById(uuid)
-                .switchIfEmpty(Mono.error(new NexusException("USUARIO NO ENCONTRADO" , HttpStatus.FORBIDDEN)))
+                .switchIfEmpty(Mono.error(new NexusException("USUARIO NO ENCONTRADO" , HttpStatusConstants.FORBIDDEN)))
                 .flatMap(ele-> {
                     ele.setFirstName(userModel.getFirstName());
                     ele.setLastName(userModel.getLastName());

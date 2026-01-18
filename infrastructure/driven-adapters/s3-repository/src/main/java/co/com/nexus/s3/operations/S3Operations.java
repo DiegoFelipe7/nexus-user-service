@@ -7,15 +7,14 @@ import lombok.RequiredArgsConstructor;
 import software.amazon.awssdk.core.async.AsyncRequestBody;
 import software.amazon.awssdk.core.async.AsyncResponseTransformer;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
-import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.ListObjectsRequest;
-import software.amazon.awssdk.services.s3.model.ListObjectsResponse;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.services.s3.model.S3Object;
+import software.amazon.awssdk.services.s3.model.*;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 
 import java.io.File;
 import java.nio.ByteBuffer;
+import java.time.Duration;
 import java.util.List;
 
 @Component
@@ -23,65 +22,79 @@ import java.util.List;
 public class S3Operations {
 
     private final S3AsyncClient s3AsyncClient;
+    private final S3Presigner s3Presigner;
 
 
-    public Mono<String> uploadObject(String bucketName, String objectKey, byte[] fileContent) {
+    public Mono<Boolean> uploadObject(String bucketName, String objectKey, byte[] fileContent) {
         return Mono.fromFuture(
-                s3AsyncClient.putObject(configurePutObject(bucketName,objectKey),
-                        AsyncRequestBody.fromBytes(fileContent)))
-                .map(response -> buildPublicUrl(bucketName, objectKey));
-    }
-
-    public Mono<Boolean> uploadObject(String bucketName,String objectKey, String fileContent) {
-        return Mono.fromFuture(
-                s3AsyncClient.putObject(configurePutObject(bucketName,objectKey),
-                        AsyncRequestBody.fromString(fileContent)))
+                        s3AsyncClient.putObject(configurePutObject(bucketName, objectKey),
+                                AsyncRequestBody.fromBytes(fileContent)))
                 .map(response -> response.sdkHttpResponse().isSuccessful());
     }
 
-    public Mono<Boolean> uploadObject(String bucketName,String objectKey, File fileContent) {
+    public Mono<Boolean> uploadObject(String bucketName, String objectKey, String fileContent) {
         return Mono.fromFuture(
-                s3AsyncClient.putObject(configurePutObject(bucketName,objectKey),
-                        AsyncRequestBody.fromFile(fileContent)))
+                        s3AsyncClient.putObject(configurePutObject(bucketName, objectKey),
+                                AsyncRequestBody.fromString(fileContent)))
                 .map(response -> response.sdkHttpResponse().isSuccessful());
     }
 
-    public Mono<List<S3Object>> listBucketObjects(String bucketName){
+    public Mono<Boolean> uploadObject(String bucketName, String objectKey, File fileContent) {
+        return Mono.fromFuture(
+                        s3AsyncClient.putObject(configurePutObject(bucketName, objectKey),
+                                AsyncRequestBody.fromFile(fileContent)))
+                .map(response -> response.sdkHttpResponse().isSuccessful());
+    }
+
+    public Mono<List<S3Object>> listBucketObjects(String bucketName) {
         return Mono.fromFuture(s3AsyncClient.listObjects(ListObjectsRequest
-                .builder()
-                .bucket(bucketName)
-                .build()))
+                        .builder()
+                        .bucket(bucketName)
+                        .build()))
                 .map(ListObjectsResponse::contents);
     }
 
-    public Flux<ByteBuffer> getObject(String bucketName,String objectKey) {
+    public Flux<ByteBuffer> getObject(String bucketName, String objectKey) {
         return Mono.fromFuture(s3AsyncClient.getObject(GetObjectRequest.builder()
-                .key(objectKey)
-                .bucket(bucketName)
-                .build(), AsyncResponseTransformer.toPublisher()))
+                        .key(objectKey)
+                        .bucket(bucketName)
+                        .build(), AsyncResponseTransformer.toPublisher()))
                 .flatMapMany(Flux::from);
     }
 
-    public Mono<Boolean> deleteObject(String bucketName,String objectKey) {
+    public Mono<Boolean> deleteObject(String bucketName, String objectKey) {
         return Mono.fromFuture(s3AsyncClient.deleteObject(DeleteObjectRequest.builder()
-                .key(objectKey)
-                .bucket(bucketName).build()))
+                        .key(objectKey)
+                        .bucket(bucketName).build()))
                 .map(response -> response.sdkHttpResponse().isSuccessful());
     }
 
-    private PutObjectRequest configurePutObject(String bucketName,String objectKey) {
+
+    public Mono<String> generatePresignedUrl(String bucketName, String objectKey, Duration expiration) {
+        return Mono.fromSupplier(() -> {
+            GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(objectKey)
+                    .build();
+
+            GetObjectPresignRequest presignRequest =
+                    GetObjectPresignRequest.builder()
+                            .signatureDuration(expiration)
+                            .getObjectRequest(getObjectRequest)
+                            .build();
+
+            return s3Presigner
+                    .presignGetObject(presignRequest)
+                    .url()
+                    .toString();
+        });
+    }
+
+    private PutObjectRequest configurePutObject(String bucketName, String objectKey) {
         return PutObjectRequest.builder()
                 .bucket(bucketName)
                 .key(objectKey)
+                .serverSideEncryption(ServerSideEncryption.AES256)
                 .build();
-    }
-
-    private String buildPublicUrl(String bucket, String key) {
-        return String.format(
-                "https://%s.s3.%s.amazonaws.com/%s",
-                bucket,
-                "region.id()",
-                key
-        );
     }
 }

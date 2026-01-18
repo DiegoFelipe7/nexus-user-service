@@ -13,13 +13,13 @@ import java.util.UUID;
 public class UserModel {
     private UUID id;
     private String firstName;
-    private UUID userId;
     private String lastName;
     private String email;
     private String phoneNumber;
     private String searchKey;
     private String avatarUrl;
     private String birthDate;
+    private UUID userId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

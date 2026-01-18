@@ -12,10 +12,9 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
 public class UserRouterRest {
     @Bean
     public RouterFunction<ServerResponse> routerFunction(UserHandler handler) {
-        return route(GET("api/v1/users"), handler::getAllUsers)
-                .and(route(GET("api/v1/users/{id}"), handler::getUserById))
-                .and(route(POST("api/v1/users"), handler::createUser))
-                .and(route(PATCH("api/v1/users/{id}"), handler::updateUser))
-                .and(route(PATCH("api/v1/users/{id}/avatar"), handler::updateUserAvatar));
+        return route(GET("users"), handler::getAllUsers)
+                .and(route(GET("users/{id}"), handler::getUserById))
+                .and(route(PATCH("users/{id}"), handler::updateUser))
+                .and(route(PATCH("users/{id}/avatar"), handler::updateUserAvatar));
     }
 }

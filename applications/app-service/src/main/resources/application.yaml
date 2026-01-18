@@ -7,13 +7,7 @@ spring:
     add-properties: false
   profiles:
     include: null
-    active: "local"
-  kafka:
-    consumer:
-      bootstrap-servers: "localhost:9092"
-      key-deserializer: "org.apache.kafka.common.serialization.StringDeserializer"
-      value-deserializer: "org.apache.kafka.common.serialization.StringDeserializer"
-      group-id: "nexus-user-service"
+    active: "production"
 management:
   endpoints:
     web:
@@ -41,9 +35,14 @@ adapters:
     schema: "public"
     username: "postgres"
     password: "postgres"
-  kafka:
-    consumer:
-      topics: "user-registration-event"
+  rabbitmq:
+    host: "localhost"
+    port: 5672
+    username: "guest"
+    password: "guest"
+    virtual-host: "/"
+    connection-timeout: 10000
+    queue: "queue.user.registration"
   aws:
     s3:
       bucketName: "ariumms-gcm-s3-bucket"
