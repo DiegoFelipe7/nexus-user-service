@@ -1,6 +1,7 @@
 package co.com.nexus.api.user;
 
 import co.com.nexus.api.config.ObjectValidator;
+import co.com.nexus.api.shared.mapper.QueryParamsMapper;
 import co.com.nexus.api.user.dto.UpdateUserRequest;
 import co.com.nexus.api.user.mapper.UserMapper;
 import co.com.nexus.model.s3.FileUploadModel;
@@ -39,7 +40,7 @@ public class UserHandler {
     public Mono<ServerResponse> getAllUsers(ServerRequest request) {
         return ServerResponse.ok()
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(getAllUsersUseCase.apply(UserMapper.mapToQueryParams(request)), PagingResult.class);
+                .body(getAllUsersUseCase.apply(QueryParamsMapper.mapToQueryParams(request)), PagingResult.class);
     }
 
     public Mono<ServerResponse> getUserById(ServerRequest request) {

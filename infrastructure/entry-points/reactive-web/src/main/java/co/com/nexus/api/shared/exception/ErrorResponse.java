@@ -1,4 +1,4 @@
-package co.com.nexus.api.exception;
+package co.com.nexus.api.shared.exception;
 
 import org.springframework.http.HttpStatus;
 

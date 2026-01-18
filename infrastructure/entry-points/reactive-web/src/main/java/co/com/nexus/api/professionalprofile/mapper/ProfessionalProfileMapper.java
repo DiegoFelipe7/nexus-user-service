@@ -14,14 +14,6 @@ public class ProfessionalProfileMapper {
         throw new IllegalStateException("Utility class");
     }
 
-    public static QueryParams mapToQueryParams(ServerRequest request) {
-        return QueryParams.builder()
-                .page(request.queryParam("page").map(Integer::parseInt).orElse(0))
-                .size(request.queryParam("size").map(Integer::parseInt).orElse(10))
-                .sortField(request.queryParam("sort").orElse("createdAt"))
-                .build();
-    }
-
     public static ProfessionalProfileModel mapToModel(ProfessionalProfileRequest request , UUID userId) {
         return ProfessionalProfileModel.builder()
                 .specialty(request.getSpecialty())

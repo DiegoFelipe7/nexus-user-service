@@ -1,4 +1,4 @@
-package co.com.nexus.api.utilities;
+package co.com.nexus.api.shared.utilities;
 
 public final class ExceptionUtils {
 

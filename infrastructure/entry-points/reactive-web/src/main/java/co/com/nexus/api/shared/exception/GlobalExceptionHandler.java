@@ -1,6 +1,6 @@
-package co.com.nexus.api.exception;
+package co.com.nexus.api.shared.exception;
 
-import co.com.nexus.api.utilities.ExceptionUtils;
+import co.com.nexus.api.shared.utilities.ExceptionUtils;
 import co.com.nexus.model.shared.exception.NexusException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -57,8 +57,8 @@ public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
             return handleCustomException(customException);
         } else if (ex instanceof WebExchangeBindException validationException) {
             return handleValidationException(validationException);
-        } else if (ex instanceof IllegalArgumentException illegalArgumentException) {
-            return handleIllegalArgumentException(illegalArgumentException);
+        } else if (ex instanceof Exception exception) {
+            return handleIllegalArgumentException(exception);
         } else {
             return handleGenericException(ex);
         }
@@ -66,44 +66,20 @@ public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
 
     private ErrorResponse handleCustomException(NexusException ex) {
         HttpStatus status = HttpStatus.valueOf(ex.getHttpStatus());
-        return ErrorResponse.of(
-                ex.getMessage(),
-                status,
-                LocalDateTime.now(),
-                ExceptionUtils.origin(ex) + ": " + ExceptionUtils.rootCause(ex)
-        );
+        return ErrorResponse.of(ex.getMessage(), status, LocalDateTime.now(), ExceptionUtils.origin(ex) + ": " + ExceptionUtils.rootCause(ex));
     }
 
     private ErrorResponse handleValidationException(WebExchangeBindException ex) {
-        String details = ex.getBindingResult()
-                .getFieldErrors()
-                .stream()
-                .map(error -> error.getField() + ": " + error.getDefaultMessage())
-                .collect(Collectors.joining(", "));
+        String details = ex.getBindingResult().getFieldErrors().stream().map(error -> error.getField() + ": " + error.getDefaultMessage()).collect(Collectors.joining(", "));
 
-        return ErrorResponse.of(
-                details,
-                HttpStatus.BAD_REQUEST,
-                LocalDateTime.now(),
-                Arrays.toString(ex.getStackTrace())
-        );
+        return ErrorResponse.of(details, HttpStatus.BAD_REQUEST, LocalDateTime.now(), Arrays.toString(ex.getStackTrace()));
     }
 
-    private ErrorResponse handleIllegalArgumentException(IllegalArgumentException ex) {
-        return ErrorResponse.of(
-                ex.getMessage(),
-                HttpStatus.BAD_REQUEST,
-                LocalDateTime.now(),
-                Arrays.toString(ex.getStackTrace())
-        );
+    private ErrorResponse handleIllegalArgumentException(Exception ex) {
+        return ErrorResponse.of(ex.getMessage(), HttpStatus.BAD_REQUEST, LocalDateTime.now(), Arrays.toString(ex.getStackTrace()));
     }
 
     private ErrorResponse handleGenericException(Throwable ex) {
-        return ErrorResponse.of(
-                ex.getMessage() != null ? ex.getMessage() :"Error interno del servidor",
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                LocalDateTime.now(),
-                Arrays.toString(ex.getStackTrace())
-        );
+        return ErrorResponse.of(ex.getMessage() != null ? ex.getMessage() : "Error interno del servidor", HttpStatus.INTERNAL_SERVER_ERROR, LocalDateTime.now(), Arrays.toString(ex.getStackTrace()));
     }
 }
